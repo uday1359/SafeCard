@@ -1,0 +1,868 @@
+/*
+ * Theme tokens as CSS custom properties: light, dark and high-contrast without a
+ * rebuild (spec sections 24 and 49).
+ *
+ * Three theme states, deliberately. An explicit choice stamps data-theme on the
+ * root; the default "system" stamps nothing and lets prefers-color-scheme decide.
+ * Every colour is defined on bare :root first so nothing has its only definition
+ * inside a media query.
+ *
+ * Sizing is in rem throughout, so the browser's text-size setting scales the
+ * whole interface rather than just the copy.
+ */
+:root {
+  --brand-1: #0d9488;
+  --brand-2: #0369a1;
+  --bg: #f4f6f8;
+  --bg-2: #e9edf2;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --border: #dbe1e8;
+  --border-strong: #c2cbd6;
+  --text: #10151b;
+  --muted: #5a6675;
+  --accent: #0f766e;
+  --accent-hover: #0b5d57;
+  --accent-text: #ffffff;
+  --urgent: #b91c1c;
+  --urgent-bg: #fef2f2;
+  --urgent-border: #fecaca;
+  --ok: #15803d;
+  --warn: #b45309;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --gap: 1.1rem;
+  --shadow: 0 1px 2px rgb(16 21 27 / 6%), 0 8px 24px rgb(16 21 27 / 6%);
+}
+
+.dark-tokens,
+:root[data-theme='dark'] {
+  --bg: #0b0f14;
+  --bg-2: #10161d;
+  --surface: #151c24;
+  --surface-2: #1b232d;
+  --border: #2a3541;
+  --border-strong: #3a4756;
+  --text: #e9eef4;
+  --muted: #96a3b3;
+  --accent: #2dd4bf;
+  --accent-hover: #5eead4;
+  --accent-text: #08120f;
+  --urgent: #fca5a5;
+  --urgent-bg: #2c1517;
+  --urgent-border: #5a2427;
+  --ok: #6ee7a8;
+  --warn: #fbbf24;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b0f14;
+    --bg-2: #10161d;
+    --surface: #151c24;
+    --surface-2: #1b232d;
+    --border: #2a3541;
+    --border-strong: #3a4756;
+    --text: #e9eef4;
+    --muted: #96a3b3;
+    --accent: #2dd4bf;
+    --accent-hover: #5eead4;
+    --accent-text: #08120f;
+    --urgent: #fca5a5;
+    --urgent-bg: #2c1517;
+    --urgent-border: #5a2427;
+    --ok: #6ee7a8;
+    --warn: #fbbf24;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+  }
+}
+
+/* Section 49: honour a stated contrast preference. */
+@media (prefers-contrast: more) {
+  :root {
+    --border: currentColor;
+    --border-strong: currentColor;
+    --muted: var(--text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell {
+  max-width: 84rem;
+  margin: 0 auto;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem clamp(1rem, 3vw, 2rem) 1rem;
+}
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.topbar h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(100deg, var(--brand-1), var(--brand-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* The gradient is decoration; forced-colors mode must still see real text. */
+@media (forced-colors: active) {
+  .topbar h1 {
+    color: CanvasText;
+  }
+}
+.topbar p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.logo {
+  flex: none;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 18%));
+}
+
+/* ---------- layout ---------- */
+
+.layout {
+  display: grid;
+  gap: var(--gap);
+  padding: 0 clamp(1rem, 3vw, 2rem) 1.5rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+/* Section 45: desktop gets a real side-by-side, not a stretched phone UI. */
+@media (min-width: 64rem) {
+  .layout {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.panel__head {
+  margin-bottom: 1.1rem;
+}
+.panel__head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.step {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--brand-1), var(--brand-2));
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex: none;
+}
+
+/* ---------- form ---------- */
+
+.formsection {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+.formsection:first-child {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.formsection__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+}
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  flex: none;
+}
+.dot--medical {
+  background: var(--urgent);
+}
+.dot--contacts {
+  background: var(--brand-2);
+}
+.dot--other {
+  background: var(--muted);
+}
+.dot--share {
+  background: var(--brand-1);
+}
+
+.note {
+  margin: -0.4rem 0 0.9rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface-2);
+  border-left: 3px solid var(--brand-1);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.grid2 {
+  display: grid;
+  gap: 0 0.8rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 30rem) {
+  .grid2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  display: block;
+  margin-bottom: 0.8rem;
+}
+.field > span {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+}
+.field em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  min-height: 2.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.75;
+}
+.field input:hover,
+.field select:hover,
+.field textarea:hover {
+  border-color: var(--accent);
+}
+.field textarea {
+  resize: vertical;
+}
+.field--check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  align-self: end;
+  margin-bottom: 1.15rem;
+  min-height: 2.6rem;
+}
+.field--check input {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-height: 0;
+  accent-color: var(--accent);
+  flex: none;
+}
+.field--check span {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: none;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 18%);
+}
+
+/* ---------- contacts ---------- */
+
+.contactlist {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+.contactrow {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.8rem 0.1rem;
+  background: var(--surface-2);
+}
+.contactrow__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.contactrow__n {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ---------- sharing ---------- */
+
+.checklist {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  /* Section 49: large touch targets. */
+  min-height: 2.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  cursor: pointer;
+  font-size: 0.88rem;
+  user-select: none;
+}
+.chip:hover {
+  border-color: var(--accent);
+}
+.chip input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+}
+.chip--on {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.summary {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.summary h4 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin: 0 0 0.4rem;
+}
+.summary ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.88rem;
+}
+.summary li {
+  padding: 0.08rem 0;
+}
+.yes {
+  color: var(--ok);
+  font-weight: 500;
+}
+.no {
+  color: var(--muted);
+}
+
+/* ---------- capacity meter ---------- */
+
+.meter {
+  --meter-color: var(--ok);
+  margin-bottom: 1rem;
+}
+.meter--warn {
+  --meter-color: var(--warn);
+}
+.meter--over {
+  --meter-color: var(--urgent);
+}
+.meter__top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.meter__track {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--bg-2);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.meter__fill {
+  height: 100%;
+  background: var(--meter-color);
+  transition: width 0.2s ease;
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  min-height: 2.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn--primary {
+  background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+  color: #fff;
+  border: 0;
+  font-weight: 600;
+  width: 100%;
+}
+.btn--primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  color: #fff;
+}
+.btn--lg {
+  min-height: 3rem;
+  font-size: 1.02rem;
+}
+.btn--ghost {
+  background: var(--surface-2);
+}
+.btn--icon {
+  padding: 0.5rem;
+  min-width: 2.6rem;
+}
+.btn--danger:hover:not(:disabled) {
+  border-color: var(--urgent);
+  color: var(--urgent);
+}
+.btn--call {
+  background: var(--surface-2);
+  text-decoration: none;
+  font-weight: 600;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+.btn--call2 {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* A visible focus ring everywhere: keyboard navigation is a hard requirement. */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- dropzone ---------- */
+
+.dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 1.4rem 1rem;
+  text-align: center;
+  margin-bottom: 0.9rem;
+  background: var(--surface-2);
+}
+.dropzone--over {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+.dropzone__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--bg-2);
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.dropzone__title {
+  margin: 0 0 0.7rem;
+  font-weight: 600;
+}
+
+.advanced {
+  margin-bottom: 0.5rem;
+}
+.advanced summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--muted);
+  padding: 0.4rem 0;
+  min-height: 2.2rem;
+}
+.advanced summary:hover {
+  color: var(--accent);
+}
+.advanced textarea {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.codeinput {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 1.25rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ---------- status ---------- */
+
+.status {
+  min-height: 1.4rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.9rem;
+}
+.error {
+  color: var(--urgent);
+  font-weight: 600;
+}
+.ok {
+  color: var(--ok);
+  font-weight: 600;
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.45rem 0 0;
+}
+.hint--ok {
+  color: var(--ok);
+}
+.muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ---------- QR output ---------- */
+
+.output {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+.qrframe {
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+}
+.qr {
+  display: block;
+  /* A white plate regardless of theme: an inverted QR does not scan. */
+  background: #fff;
+  padding: 0.55rem;
+  border-radius: var(--radius-sm);
+  max-width: 100%;
+  height: auto;
+}
+.sharecode {
+  text-align: center;
+  width: 100%;
+}
+.sharecode h3 {
+  margin: 0;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.sharecode__value {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 2rem;
+  letter-spacing: 0.16em;
+  margin: 0.2rem 0 0.6rem;
+  font-weight: 700;
+}
+.rowbtns {
+  display: flex;
+  gap: 0.45rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stats {
+  width: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  display: grid;
+  gap: 0.25rem;
+}
+.stats > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.28rem;
+}
+.stats dt {
+  color: var(--muted);
+}
+.stats dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the emergency card (sections 14 and 23) ---------- */
+
+.ecard {
+  margin-top: 1.1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.ecard__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(100deg, var(--brand-1), var(--brand-2));
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+}
+.ecard__ver {
+  opacity: 0.8;
+  letter-spacing: 0;
+}
+.ecard__id {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.9rem;
+}
+.ecard__name {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+.ecard__sub {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0.15rem;
+}
+.ecard__urgent {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0.9rem 0.9rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--urgent-bg);
+  border: 1px solid var(--urgent-border);
+  border-radius: var(--radius-sm);
+}
+.urgent {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.urgent__k {
+  color: var(--urgent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.urgent__v {
+  color: var(--urgent);
+  font-weight: 700;
+  text-align: right;
+}
+.urgent__v--big {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.ecard__contacts {
+  padding: 0 0.9rem 0.9rem;
+}
+.ecard__contacts h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+.ecard__contacts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+.ec__who {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.ec__rel {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.ecard__rows {
+  margin: 0;
+  padding: 0 0.9rem;
+}
+.ecard__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.42rem 0;
+  border-top: 1px solid var(--border);
+}
+.ecard__row dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+  flex: none;
+}
+.ecard__row dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.ecard__foot {
+  margin-top: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.footnote {
+  padding: 0.5rem clamp(1rem, 3vw, 2rem) 3rem;
+  color: var(--muted);
+  font-size: 0.83rem;
+  max-width: 62rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Printing a QR onto paper is a listed feature (section 16), so print gets a
+   real stylesheet rather than whatever the browser does by default. */
+@media print {
+  .topbar,
+  .footnote,
+  .rowbtns,
+  .dropzone,
+  .advanced,
+  .form,
+  .checklist,
+  .summary,
+  .meter,
+  .btn {
+    display: none !important;
+  }
+  .panel {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+  .qrframe {
+    background: none;
+    padding: 0;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

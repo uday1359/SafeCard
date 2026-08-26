@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm test -- *)",
+      "Bash(npm run dev)",
+      "Bash(npm run build)",
+      "Bash(npm run preview)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run test:phase0)",
+      "Bash(npm run test:watch)",
+      "Bash(npm ci)",
+      "Bash(npm install)",
+      "Bash(npm ls *)",
+      "Bash(npm outdated)",
+      "Bash(npx vitest)",
+      "Bash(npx vitest *)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(node tool/copy-wasm.mjs)",
+      "Bash(node -v)",
+      "Bash(npm -v)",
+      "Bash(curl http://localhost:*)",
+      "Bash(curl http://127.0.0.1:*)",
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git branch)",
+      "Bash(git remote -v)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets.json)",
+      "Read(./*.pem)",
+      "Read(./*.key)",
+      "Read(./*.p12)",
+      "Bash(npm publish *)",
+      "Bash(npm publish)"
+    ]
+  }
+}
