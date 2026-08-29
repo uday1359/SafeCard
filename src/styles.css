@@ -838,7 +838,18 @@ body {
 }
 
 /* Printing a QR onto paper is a listed feature (section 16), so print gets a
-   real stylesheet rather than whatever the browser does by default. */
+   real stylesheet rather than whatever the browser does by default.
+
+   What this hides is a security control, not a layout choice. A printed sheet
+   is one artefact that leaves the owner's hands, so everything on it travels
+   together -- and the scheme only works because the QR and the share code
+   travel separately (section 4). Printing the code beside the QR hands whoever
+   finds the paper both halves at once, which is the same failure as naming the
+   downloaded PNG after the code; see qrDownloadName in OwnerPanel.tsx.
+
+   .ecard is on the list for the same reason from the other direction: it is a
+   decrypted card sitting in the recipient panel, and printing a QR must never
+   quietly print somebody else's medical details along with it. */
 @media print {
   .topbar,
   .footnote,
@@ -849,7 +860,10 @@ body {
   .checklist,
   .summary,
   .meter,
-  .btn {
+  .btn,
+  .sharecode,
+  .stats,
+  .ecard {
     display: none !important;
   }
   .panel {
@@ -864,5 +878,83 @@ body {
   body {
     background: #fff;
     color: #000;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Application lock (Phase 2 storage / Phase 3 lock).
+   --------------------------------------------------------------------------- */
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.savestate {
+  color: var(--muted);
+  font-size: 0.82rem;
+  /* Reserve the row so the layout does not jump as the text changes. */
+  min-width: 9.5rem;
+  text-align: right;
+}
+
+/* The lock screen is the only thing on the page, so it should not stretch to
+   the full two-column grid width on a desktop. */
+.layout--single {
+  grid-template-columns: 1fr;
+  max-width: 34rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.panel--lock form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.panel--lock .btn--lg {
+  width: 100%;
+  justify-content: center;
+}
+
+.lock__intro {
+  margin: 0 0 1.1rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.lock__help,
+.lock__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.lock__note {
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Not colour alone: the warning also reads as words. */
+.lock__warn {
+  color: var(--urgent);
+}
+
+.lock__error {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--urgent-border);
+  background: var(--urgent-bg);
+  color: var(--urgent);
+  font-size: 0.87rem;
+}
+
+@media (min-width: 40rem) {
+  .savestate {
+    min-width: 10.5rem;
   }
 }

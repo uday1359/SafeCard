@@ -81,3 +81,36 @@ export const ARGON_DEFAULTS = {
   time: 3,
   parallelism: 1,
 } as const;
+
+/**
+ * Target parameters for the vault -- encryption at rest.
+ *
+ * Deliberately separate from `ARGON_DEFAULTS`, because the two derivations are
+ * paid for under opposite constraints. A QR is unlocked on a stranger's phone,
+ * possibly an old one, by someone in a hurry during an emergency; the cost has to
+ * fit the worst device that might ever scan it. The vault is unlocked once, on the
+ * owner's own device, by someone who has already decided to wait.
+ *
+ * Sharing one constant would mean that lowering the QR cost to fit a low-end
+ * scanner also weakens the encryption protecting every card stored on every
+ * device -- a silent downgrade of the stronger control to satisfy the weaker one.
+ * `ARGON_DEFAULTS` is expected to come down after the Phase 0 hardware benchmark.
+ * These must not follow it.
+ *
+ * Still inside the gate-5 ceiling, so stored parameters validate on the same path
+ * as header parameters.
+ *
+ * Measured on a desktop (Node, one derivation): 32 MiB = 150 ms, 64 MiB = 257 ms,
+ * 128 MiB = 541 ms. A low-end phone browser runs several times slower, and this
+ * runs on the main thread, so unlock blocks the UI for as long as it takes. That
+ * is acceptable for a once-per-session cost and is not yet confirmed on hardware:
+ * iOS Safari kills memory-hungry tabs, and 128 MiB is where that risk starts. If
+ * the Phase 0 device benchmark says it must come down, 64 MiB is the fallback --
+ * and the point of this constant is that lowering it is a decision taken here,
+ * for the vault, rather than inherited from a QR-scanning budget.
+ */
+export const VAULT_ARGON_DEFAULTS = {
+  memKiB: 128 * 1024, // 128 MiB
+  time: 3,
+  parallelism: 1,
+} as const;

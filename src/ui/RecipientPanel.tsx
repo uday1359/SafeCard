@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { CardPayload } from '../core/crypto/cardPayload.js';
 import { decodePayload, fromBase64Url, toBase64Url } from '../core/crypto/codec.js';
@@ -24,6 +24,32 @@ export function RecipientPanel({ autofill }: { autofill?: string }) {
   const [source, setSource] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Mirror a freshly generated payload into the textarea.
+   *
+   * The harness puts both sides of the exchange on one page so the loop can be
+   * exercised on a single machine (App.tsx), and this is what was meant to make
+   * that work. Without it the prop was accepted and dropped: the payload never
+   * arrived, the placeholder claimed the opposite of what was happening, and the
+   * README documented an autofill that did not exist.
+   *
+   * Only the payload crosses. The share code deliberately does not -- a
+   * recipient has to obtain that through the other channel, and a harness that
+   * filled it in for them would be demonstrating a loop the real product does
+   * not have.
+   *
+   * Regenerating clears any card already on screen, for the same reason
+   * OwnerPanel drops its QR on an edit: a decoded card shown beside a payload it
+   * did not come from is exactly the confusion section 20 warns about.
+   */
+  useEffect(() => {
+    if (!autofill) return;
+    setPayloadText(autofill);
+    setCard(null);
+    setError(null);
+    setSource(null);
+  }, [autofill]);
 
   async function loadImage(file: File | Blob, label: string) {
     setError(null);
@@ -121,7 +147,7 @@ export function RecipientPanel({ autofill }: { autofill?: string }) {
             onChange={(e) => setPayloadText(e.target.value)}
             rows={3}
             spellCheck={false}
-            placeholder={autofill ? 'Generate a QR on the left to fill this in' : 'U0MB…'}
+            placeholder="U0MB…"
           />
         </label>
       </details>

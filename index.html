@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- The Content-Security-Policy is injected at build time by the safecard-csp
+         plugin in vite.config.ts; it is absent here on purpose because the dev
+         server needs looser rules than the shipped policy. Check it with
+         `npm run preview`, not `npm run dev`. -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />

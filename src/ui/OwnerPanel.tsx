@@ -29,6 +29,24 @@ const DEFAULT_SELECTED: FieldKey[] = [
   'emergencyContacts',
 ];
 
+/**
+ * The filename for a downloaded QR image.
+ *
+ * Deliberately carries no share code. The whole scheme rests on the QR and the
+ * code reaching the recipient by different channels, and a filename is not a
+ * channel the owner controls: it shows up in the Downloads listing, in OS search
+ * indexes, in any cloud sync of that folder, and it travels with the file into
+ * every message the PNG is ever attached to. Naming the file after the secret
+ * collapses both halves into one artefact that unlocks itself.
+ *
+ * The timestamp is what the share code was doing usefully -- telling two
+ * downloads apart -- without being a secret.
+ */
+export function qrDownloadName(at: Date = new Date()): string {
+  const stamp = at.toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  return `safecard-qr-${stamp}.png`;
+}
+
 export interface GeneratedQr {
   payload: Bytes;
   qr: RenderedQr;
@@ -164,7 +182,7 @@ export function OwnerPanel({
     if (!result) return;
     const a = document.createElement('a');
     a.href = result.qr.dataUrl;
-    a.download = `safecard-${result.shareCode}.png`;
+    a.download = qrDownloadName();
     a.click();
   }
 

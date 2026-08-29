@@ -266,12 +266,18 @@ OS, and the Argon2 parameters are settled.**
 
 ### Phase 2 — Storage and durability
 
-- [ ] IndexedDB schema via `idb`; card, contact and settings stores.
-- [ ] Generate the DEK; wrap it with the lock key; store only the wrapped form.
-- [ ] Per-record AES-GCM encryption in the repository layer, invisible to callers.
-- [ ] Card + contact CRUD behind the create-card wizard (§13).
+- [x] IndexedDB schema via `idb`; `meta`, `records` and `settings` stores. Contacts live inside the
+      card record rather than in their own store — they are edited as part of the card, never
+      independently, and a separate store would buy nothing but a join.
+- [x] Generate the DEK; wrap it with the lock key; store only the wrapped form.
+- [x] Per-record AES-GCM encryption in the repository layer, invisible to callers. The record AAD
+      binds each blob to its store and key, so a record cannot be moved between slots.
+- [ ] Card + contact CRUD behind the create-card wizard (§13). The card persists and autosaves, but
+      the wizard itself is not built — the harness form is still the only editor.
 - [ ] Photo import with resize and encrypted blob storage.
-- [ ] `navigator.storage.persist()` request and PWA install prompt.
+- [x] `navigator.storage.persist()` request — asked after the vault exists, not before, and a
+      refusal is surfaced in the footer rather than swallowed.
+- [ ] PWA install prompt.
 - [ ] **Encrypted backup export and import.** Promoted from the native plan's Phase 6 — on the web,
       storage is evictable, so backup is a v1 durability requirement rather than a convenience.
 - [ ] **Forced backup download** after the first card is saved.
@@ -279,11 +285,16 @@ OS, and the Argon2 parameters are settled.**
 ### Phase 3 — Application lock (Layer 1, §4)
 
 - [ ] WebAuthn passkey registration with the `prf` extension; derive the key-wrapping key.
-- [ ] Feature-detect PRF and fall back to PIN/passphrase → Argon2id → wrapping key.
-- [ ] Lock on `pagehide` and `visibilitychange → hidden`; wipe derived material (see 2.3).
+- [x] Passphrase → Argon2id → wrapping key. This is the fallback path, built first because Phase 2
+      storage needs *some* lock key to wrap the DEK with; PRF slots in above it without changing
+      anything downstream of `LockSecret`.
+- [ ] Feature-detect PRF and prefer it where available.
+- [x] Lock on `pagehide` and `visibilitychange → hidden`; wipe derived material (see 2.3). Locking
+      drops the decrypted card and the generated share code too, not just the key — a backgrounded
+      tab keeps everything resident, so dropping the key alone would protect nothing.
 - [ ] Idle auto-lock.
-- [ ] **Keep the app lock and the share code as structurally distinct types** — §4 forbids reusing
-      one as the other. Enforce with branded TypeScript types, not convention.
+- [x] **Keep the app lock and the share code as structurally distinct types** — §4 forbids reusing
+      one as the other. Enforced with branded TypeScript types: `LockSecret` and `ShareCodeSecret`.
 
 ### Phase 4 — QR generation (Layer 2)
 
@@ -317,7 +328,12 @@ OS, and the Argon2 parameters are settled.**
 
 ### Phase 7 — Hardening and release
 
-- [ ] **Strict CSP** — `default-src 'self'`, no inline script, no external origins. Trusted Types.
+- [x] **Strict CSP** — `default-src 'self'`, no inline script, no external origins. Injected into
+      the built `index.html` by the `safecard-csp` plugin in `vite.config.ts` (build only; the dev
+      server needs looser rules and must not dictate the shipped policy). `'wasm-unsafe-eval'`,
+      `img-src data:` and `style-src 'unsafe-inline'` are required by Argon2/zxing, the QR data URL
+      and React's inline styles respectively — removing any of the three breaks the app. Trusted
+      Types not yet applied. **Enforcement is NOT VALIDATED in a real browser.**
 - [ ] Subresource Integrity; audit and minimise the dependency tree.
 - [ ] Playwright matrix: Chromium, Firefox, WebKit; offline simulation of every core flow (§21).
 - [ ] Real-device pass: low-end Android, iPhone/Safari, desktop.
@@ -381,7 +397,8 @@ Every added dependency is a supply-chain entry into this scenario.
 - Grep for `string` in crypto signatures — should be zero.
 - Create a card, then inspect IndexedDB in DevTools: **no plaintext PII**.
 - Confirm no secret reaches `console` in a production build.
-- CSP has no `unsafe-inline` and no external origins.
+- CSP has no external origins. `style-src 'unsafe-inline'` remains, and is the one gap left:
+  closing it needs React's inline styles moved to classes first.
 
 **E2E (Playwright)**
 - Owner journey (§52) and recipient journey, both **offline**.

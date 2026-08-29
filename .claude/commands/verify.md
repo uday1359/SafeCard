@@ -11,9 +11,9 @@ Run the three checks that gate a change in this repo, in order, and stop at the 
 
 Then report:
 
-- Whether each step passed, with the actual counts (expected baseline: **38 passed, 3 skipped**).
+- Whether each step passed, with the actual counts (expected baseline: **102 passed, 3 skipped**).
 - The bundle size from the build output, and whether it moved materially from the last known
-  figure (326 kB raw / 108 kB gzipped).
+  figure (339 kB raw / 111 kB gzipped).
 - The realistic-card payload size printed by the size-budget test, against the 600-byte budget.
 
 If the size-budget test failed, say so prominently rather than burying it — per CLAUDE.md that test

@@ -4,13 +4,18 @@
 > emergency details locally and share selected information through a password-protected encrypted
 > QR code.
 
-**Status: Phase 0 complete, Phase 1 partial.** The QR codec, wire format, share-code derivation and
-all seven validation gates are implemented and tested, and there is a working owner/recipient
-harness you can run — see [Running the app](#running-the-app).
+**Status: Phase 0 complete, Phases 1 and 2 partial.** The QR codec, wire format, share-code
+derivation, all seven validation gates and encryption at rest are implemented and tested, and there
+is a working owner/recipient harness you can run — see [Running the app](#running-the-app).
 
-Not built yet: the application lock, IndexedDB storage, encrypted backup, live camera scanning, the
-service worker, and the Web Worker for the KDF. **Nothing is persisted** — reloading clears the
-draft.
+**Your card is encrypted on this device and survives a reload.** It is protected with AES-256-GCM
+under a data key wrapped by an Argon2id-derived passphrase key, so nothing readable is written to
+IndexedDB.
+
+Not built yet: passkey (WebAuthn PRF) unlock and idle auto-lock, encrypted backup export and import,
+photo storage, live camera scanning, the service worker, and the Web Worker for the KDF. Because
+backup export does not exist yet and browser storage is evictable, **do not treat this as your only
+copy of anything.**
 
 ---
 
@@ -59,7 +64,7 @@ assets.
 | `npm run dev` | Copies WASM, then Vite dev server on `:5173` |
 | `npm run build` | Copies WASM, typechecks, production build into `dist/` |
 | `npm run preview` | Serves the built `dist/` on `:4173` — use it to check the real bundle |
-| `npm test` | Full suite: codec correctness, validation gates, tamper resistance |
+| `npm test` | Full suite: codec correctness, validation gates, tamper resistance, encryption at rest, and the vault state machine |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run test:phase0` | Opt-in Argon2 benchmark + QR sizing report (slower) |
 
@@ -73,8 +78,12 @@ npx vitest                           # watch mode
 
 ### Try the full loop
 
-The page is the Phase 0/1 harness: both sides of the exchange sit side by side so the core loop can
+The page is the Phase 0–2 harness: both sides of the exchange sit side by side so the core loop can
 be exercised end to end on one machine.
+
+On first run you are asked to choose a passphrase, which creates the encrypted store on this device.
+Deriving the key takes a moment on purpose. After that, edits save automatically — reload the page
+and unlock to prove it. **Lock** in the header drops the key *and* the decrypted card from memory.
 
 1. **Panel 1 — Your emergency card.** It opens prefilled with sample data. Edit any field; the
    capacity meter under the form shows the exact payload size in bytes as you type, against the
@@ -101,7 +110,8 @@ app, or print it.
 | `Port 5173 is already in use` and the server exits instead of moving | Deliberate — `strictPort: true` in `vite.config.ts`, so the URL never silently changes. Free the port, or edit the port there. |
 | On Windows, `npm run test:phase0` fails with `'PHASE0_BENCH' is not recognized as an internal or external command` | The script uses the POSIX prefix form `PHASE0_BENCH=1 vitest run`, which cmd and PowerShell do not parse. In PowerShell run `$env:PHASE0_BENCH=1; npx vitest run test/phase0-report.test.ts` instead. |
 | Unlock reports a bad code when you are sure the code is right | Formatting is not the cause: `k7f2qm9x` and `K7F2-QM9X` derive the same key. By design (§18) a wrong code and a tampered payload produce byte-identical messages, so a cropped or corrupted QR looks exactly like a wrong code. |
-| Everything you typed disappears on reload | Expected. Local storage is Phase 2; nothing is persisted yet. |
+| Everything you typed disappears on reload | No longer expected — the card is saved encrypted. If it still happens, the browser is discarding IndexedDB (private windows in some browsers), or the save failed; the header shows "Could not save" when it does. |
+| You forgot the passphrase | There is no recovery, by design — the key exists nowhere but in your passphrase. Clear the site's storage to start over; the stored card becomes permanently unreadable. |
 
 ---
 
